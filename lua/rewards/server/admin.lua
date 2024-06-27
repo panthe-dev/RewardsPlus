@@ -1,9 +1,19 @@
 net.Receive("Rewards.AdminPopup", function(len, ply)
-    local giveawaytable = sendAllGiveaways(ply)
+    local giveawaytable = Rewards.sendAllGiveaways(ply)
 
     if IsValid(ply) and Rewards.Config.AdminGroup[ply:GetUserGroup()] then
         net.Start("Rewards.AfficherAdminPopup")
-        net.WriteTable(giveawaytable)
+        net.WriteUInt(#giveawaytable, 8)  
+        for _, giveaway in ipairs(giveawaytable) do
+            net.WriteString(giveaway.name)
+            net.WriteString(giveaway.rewardtype)
+            net.WriteInt(giveaway.amount, 32)
+            net.WriteBool(giveaway.hasJoined)
+            net.WriteString(giveaway.winner)
+            net.WriteBool(giveaway.redeem)
+            net.WriteInt(giveaway.players, 8)
+            net.WriteString(giveaway.requirement)
+        end
         net.Send(ply)
     else
         ply:ChatPrint(Rewards.getTranslation("adminMsg"))
@@ -12,7 +22,7 @@ end)
 
 local function checkRewards(ply, reqtype)
     if reqtype == "VIP" then
-        return table.HasValue(Rewards.VIPgroup, ply:GetUserGroup())
+        return Rewards.VIPgroup[ply:GetUserGroup()] == true
     end
     return ply:GetPData("rewards_"..reqtype) == "true"
 end
@@ -40,7 +50,10 @@ net.Receive("Rewards.RequestPlayerRewards", function(len, ply)
     rewardsData["Referral Reward"] = refReward
     
     net.Start("Rewards.SendPlayerRewards")
-    net.WriteTable(rewardsData)
+    net.WriteString(rewardsData["Discord Reward"])
+    net.WriteString(rewardsData["Steam Reward"])
+    net.WriteString(rewardsData["Playtime Reward"])
+    net.WriteString(rewardsData["Referral Reward"])
     net.Send(ply)
 end)
 
@@ -161,7 +174,10 @@ concommand.Add("set_giveaway", function(ply, cmd, args)
     local giveawayData = {
         name = title,
         rewardtype = rewardType,
-        requirement = requirementType
+        requirement = requirementType,
+        players = nil,
+        winner = "",
+        redeem = false
     }
 
     -- Ajouter des informations supplémentaires selon le type de récompense
@@ -183,7 +199,7 @@ concommand.Add("set_giveaway", function(ply, cmd, args)
     file.Write(filePath, util.TableToJSON(giveawaysData, true))
 
     print(Rewards.getTranslation("err5"))
-    sendAnnounce(ply,Rewards.getTranslation("ann1"))
+    Rewards.sendAnnounce(ply,Rewards.getTranslation("ann1"))
 end)
 
 
@@ -266,7 +282,7 @@ concommand.Add("join_giveaway", function(ply, cmd, args)
         print(Rewards.getTranslation("err9"))
         return
     end
-    if giveaways.winner then
+    if giveaway.winner ~= "" then
         ply:ChatPrint(Rewards.getTranslation("err10"))
         return
     end
@@ -349,57 +365,9 @@ concommand.Add("rand_giveaway", function(ply, cmd, args)
     -- Mettre à jour le fichier JSON avec le gagnant
     file.Write(filePath, util.TableToJSON(giveawaysData))
 
-    sendAnnounce(ply, Rewards.getTranslation("err17") .. title .. Rewards.getTranslation("err18") .. winnerSteamID)
+    Rewards.sendAnnounce(ply, Rewards.getTranslation("err17") .. title .. Rewards.getTranslation("err18") .. winnerSteamID)
 end)
 
-function sendAllGiveaways(ply)
-    local filePath = "rewards/giveaways.json"
-
-    if not file.Exists(filePath, "DATA") then
-        print(Rewards.getTranslation("err14"))
-        return {}
-    end
-
-    local fileContents = file.Read(filePath, "DATA")
-    local giveaways = util.JSONToTable(fileContents)
-
-    if not giveaways then
-        print(Rewards.getTranslation("err19"))
-        return {}
-    end
-
-    -- Tableau pour stocker tous les giveaways
-    local giveawaysTable = {}
-
-    -- Parcourir chaque giveaway et les ajouter au tableau
-    for title, giveawayData in pairs(giveaways.giveaways) do
-        local players = giveawayData.players or {}
-        local requirement = Rewards.getTranslation("descAdmin24")
-
-        if giveawayData.requirement == "steam" then requirement = Rewards.getTranslation("descAdmin20")
-        elseif giveawayData.requirement == "discord" then requirement = Rewards.getTranslation("descAdmin21")
-        elseif giveawayData.requirement == "ref" then requirement = Rewards.getTranslation("descAdmin22")
-        elseif giveawayData.requirement == "VIP" then requirement = Rewards.getTranslation("descAdmin23")
-        else requirement = Rewards.getTranslation("descAdmin24")
-        end
-        
-
-        local giveaway = {
-            name = giveawayData.name or "Unnamed Giveaway",
-            rewardtype = giveawayData.rewardtype or "Unknown Reward Type",
-            amount = giveawayData.amount or 0,  
-            hasJoined = table.HasValue(players, ply:SteamID()),
-            winner = giveawayData.winner or false,
-            redeem = giveawayData.redeem or false,
-            players = #players or 0,
-            requirement = requirement
-            
-        }
-        table.insert(giveawaysTable, giveaway)
-    end
-
-    return giveawaysTable
-end
 
 net.Receive("Rewards.redGiveaway", function(len, ply)
     local giveawayName = net.ReadString()

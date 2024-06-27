@@ -10,11 +10,11 @@ if SERVER then
 	local function AddCSLuaFiles(dir)
 		local files, folders = file.Find(dir .. '*', 'LUA')
 
-		for _, luafile in pairs(files) do
+		for _, luafile in ipairs(files) do
 			AddCSLuaFile(dir .. luafile)
 		end
 
-		for _, luadir in pairs(folders) do
+		for _, luadir in ipairs(folders) do
 			AddCSLuaFiles(dir .. luadir .. '/')
 		end
 	end

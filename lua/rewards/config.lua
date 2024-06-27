@@ -31,8 +31,8 @@ Rewards.EnablePopUpSpawn = true -- enable/disable displaying pop up during initi
 Rewards.ServerTag = "[EXAMPLE]" -- change EXAMPLE by the server tag you want
 
 Rewards.VIPgroup = {
-    "vip",
-    "superadmin"
+    ["vip"] = true,
+    ["superadmin"] = true
 }
 
 Rewards.Config.AdminGroup = {

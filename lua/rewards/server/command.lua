@@ -12,12 +12,37 @@ if SERVER then
 
 
     local function EnvoyerPopup(ply, checkData)
-        local giveawaytable = sendAllGiveaways(ply)
-        
+        local giveawaytable = Rewards.sendAllGiveaways(ply)
+
         net.Start("Rewards.AfficherPopup")
-        net.WriteTable(giveawaytable)
-        net.WriteTable(Tasks)
-        net.WriteTable(checkData)
+        
+        net.WriteUInt(#giveawaytable, 8)  
+        for _, giveaway in ipairs(giveawaytable) do
+            net.WriteString(giveaway.name)
+            net.WriteString(giveaway.rewardtype)
+            net.WriteInt(giveaway.amount, 32)
+            net.WriteBool(giveaway.hasJoined)
+            net.WriteString(giveaway.winner)
+            net.WriteBool(giveaway.redeem)
+            net.WriteInt(giveaway.players, 8)
+            net.WriteString(giveaway.requirement)
+        end
+
+        net.WriteUInt(#Tasks, 8) 
+        for _, task in ipairs(Tasks) do
+            net.WriteString(task.action)
+            net.WriteString(task.description)
+            net.WriteString(task.image)
+            net.WriteString(task.name)
+        end
+
+        net.WriteBool(checkData.daily)
+        net.WriteBool(checkData.discord)
+        net.WriteString(checkData.ref)
+        net.WriteString(checkData.refcode)
+        net.WriteBool(checkData.steam)
+        net.WriteBool(checkData.vip)
+
         net.WriteString(ply:SteamID())
         net.Send(ply)
     end

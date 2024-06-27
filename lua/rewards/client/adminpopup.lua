@@ -2,7 +2,22 @@ if CLIENT then
     local popupFrameOpen = false
 
     net.Receive("Rewards.AfficherAdminPopup", function()
-        local Giveaways = net.ReadTable()
+        local Giveaways = {}
+        local numGiveaways = net.ReadUInt(8)
+
+        for i = 1, numGiveaways do
+            local giveaway = {
+                name = net.ReadString(),
+                rewardtype = net.ReadString(),
+                amount = net.ReadInt(32),
+                hasJoined = net.ReadBool(),
+                winner = net.ReadString(),
+                redeem = net.ReadBool(),
+                players = net.ReadInt(8),
+                requirement = net.ReadString()
+            }
+            table.insert(Giveaways, giveaway)
+        end
 
         if popupFrameOpen then
             return
@@ -232,7 +247,7 @@ if CLIENT then
         -- Scroll bar Giveaway
         local giveawayScrollPanel = vgui.Create("DScrollPanel", manageGiveawayPanel)
         giveawayScrollPanel:Dock(FILL)
-        CustomizeScrollBar(giveawayScrollPanel)
+        Rewards.CustomizeScrollBar(giveawayScrollPanel)
 
         -- Add giveaways in tab Giveaways
         local giveawayYPos = 10
@@ -277,7 +292,7 @@ if CLIENT then
             reqlabel:SizeToContents()
             reqlabel:SetPos(100, 50)
 
-            if giveaway.winner then
+            if giveaway.winner ~= "" then
                 local giveawayWinnerLabel = vgui.Create("DLabel", giveawayPanel)
                 giveawayWinnerLabel:SetText(Rewards.getTranslation("descAdmin11")..giveaway.winner)
                 giveawayWinnerLabel:SetFont("Trebuchet18")
@@ -312,7 +327,7 @@ if CLIENT then
                 draw.RoundedBox(4, 0, 0, w, h, Color(0, 153, 230, 255))
             end
 
-            if giveaway.winner then
+            if giveaway.winner ~= "" then
                 randButton:SetEnabled(false)
                 randButton.Paint = function(self, w, h)
                     draw.RoundedBox(4, 0, 0, w, h, Color(128, 128, 128, 255))
@@ -328,13 +343,18 @@ if CLIENT then
         end
 
         -- Add tabs
-        AddCustomSheet(propertySheet, Rewards.getTranslation("onglet3"), checkRewardsPanel, "icon16/user.png")
-        AddCustomSheet(propertySheet, Rewards.getTranslation("onglet4"), createGiveawayPanel, "icon16/medal_gold_1.png")
-        AddCustomSheet(propertySheet, Rewards.getTranslation("onglet5"), manageGiveawayPanel, "icon16/table_edit.png")     
+        Rewards.AddCustomSheet(propertySheet, Rewards.getTranslation("onglet3"), checkRewardsPanel, "icon16/user.png")
+        Rewards.AddCustomSheet(propertySheet, Rewards.getTranslation("onglet4"), createGiveawayPanel, "icon16/medal_gold_1.png")
+        Rewards.AddCustomSheet(propertySheet, Rewards.getTranslation("onglet5"), manageGiveawayPanel, "icon16/table_edit.png")     
     end)
 
     net.Receive("Rewards.SendPlayerRewards", function()
-        local rewardsData = net.ReadTable()
+        local rewardsData = {}
+        rewardsData["Discord Reward"] = net.ReadString()
+        rewardsData["Steam Reward"] = net.ReadString()
+        rewardsData["Playtime Reward"] = net.ReadString()
+        rewardsData["Referral Reward"] = net.ReadString()
+
 
         local frame = vgui.Create("DFrame")
         frame:SetSize(500, 400)

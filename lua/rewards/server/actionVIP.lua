@@ -14,7 +14,7 @@ net.Receive("Rewards.actionVIP", function(len, ply)
 
     local allowedGroups = Rewards.VIPgroup
     
-    if(table.HasValue(allowedGroups, ply:GetUserGroup())) then
+    if allowedGroups[ply:GetUserGroup()] == true then
         if Utilities.isPlayerOnCooldown(ply, cooldowns, cooldownTime) then
             local remainingTime = cooldownTime - (os.time() - cooldowns[ply:SteamID()])
             local hours = math.floor(remainingTime / 3600)

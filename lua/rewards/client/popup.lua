@@ -3,9 +3,46 @@ if CLIENT then
     local popupFrameOpen = false
 
     net.Receive("Rewards.AfficherPopup", function(len, ply)
-        local Giveaways = net.ReadTable()
-        local Tasks = net.ReadTable()   
-        local checkData = net.ReadTable()
+
+        local Giveaways = {}
+        local numGiveaways = net.ReadUInt(8)
+
+        for i = 1, numGiveaways do
+            local giveaway = {
+                name = net.ReadString(),
+                rewardtype = net.ReadString(),
+                amount = net.ReadInt(32),
+                hasJoined = net.ReadBool(),
+                winner = net.ReadString(),
+                redeem = net.ReadBool(),
+                players = net.ReadInt(8),
+                requirement = net.ReadString()
+            }
+            table.insert(Giveaways, giveaway)
+        end
+
+        local Tasks = {}
+        local numTasks = net.ReadUInt(8)
+        
+        for i = 1, numTasks do
+            local task = {
+                action = net.ReadString(), 
+                description = net.ReadString(),
+                image = net.ReadString(),
+                name = net.ReadString()
+            }
+            table.insert(Tasks, task)
+        end
+ 
+        local checkData = {
+            daily = net.ReadBool(),
+            discord = net.ReadBool(),
+            ref = net.ReadString(),
+            refcode = net.ReadString(),
+            steam = net.ReadBool(),
+            vip = net.ReadBool()
+        }
+
         local steamid = net.ReadString()
 
         if(popupFrameOpen) then -- prevent from opening multiple menus
@@ -48,8 +85,8 @@ if CLIENT then
         end
 
         -- tabs
-        AddCustomSheet(propertySheet, Rewards.getTranslation("onglet1"), taskWindow, "icon16/star.png")       
-        AddCustomSheet(propertySheet, Rewards.getTranslation("onglet2"), giveawaysWindow, "icon16/medal_gold_1.png")
+        Rewards.AddCustomSheet(propertySheet, Rewards.getTranslation("onglet1"), taskWindow, "icon16/star.png")       
+        Rewards.AddCustomSheet(propertySheet, Rewards.getTranslation("onglet2"), giveawaysWindow, "icon16/medal_gold_1.png")
 
         -- scroll bar
 
@@ -59,8 +96,8 @@ if CLIENT then
         local giveawayScrollPanel = vgui.Create("DScrollPanel", giveawaysWindow)
         giveawayScrollPanel:Dock(FILL)
 
-        CustomizeScrollBar(taskScrollPanel)
-        CustomizeScrollBar(giveawayScrollPanel)
+        Rewards.CustomizeScrollBar(taskScrollPanel)
+        Rewards.CustomizeScrollBar(giveawayScrollPanel)
 
         -- Header
         local titleLabel = vgui.Create("DLabel", popupFrame)
@@ -128,8 +165,8 @@ if CLIENT then
             actionDescriptionLabel:SetTextColor(Color(255, 255, 255))
 
             -- Création du bouton "Redeem Reward"
-            if (checkData.steam == 'true' and task.name == "Steam Group") or 
-                (checkData.discord == 'true' and task.name == "Discord") or
+            if (checkData.steam and task.name == "Steam Group") or 
+                (checkData.discord and task.name == "Discord") or
                 (checkData.ref == 'true' and task.name == "Referral Code")
              then
 
@@ -241,7 +278,7 @@ if CLIENT then
             reqlabel:SizeToContents()
             reqlabel:SetPos(100, 50)
 
-            if giveaway.winner then
+            if giveaway.winner ~= "" then
                 local giveawayWinnerLabel = vgui.Create("DLabel", giveawayPanel)
                 giveawayWinnerLabel:SetText(Rewards.getTranslation("descAdmin11")..giveaway.winner)
                 giveawayWinnerLabel:SetFont("Trebuchet18")
@@ -256,7 +293,7 @@ if CLIENT then
             joinButton:SetTextColor(Color(255, 255, 255))
             joinButton:SetSize(50, 30)
             joinButton:SetPos(490, 25)
-            if giveaway.hasJoined or giveaway.winner then
+            if giveaway.hasJoined or giveaway.winner ~= "" then
                 joinButton:SetDisabled(true)
             end
             joinButton.Paint = function(self, w, h)

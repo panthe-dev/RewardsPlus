@@ -1,4 +1,4 @@
- function CustomizeTab(tab)
+ local function CustomizeTab(tab)
     tab:SetTextColor(Color(255, 255, 255))
     tab.Paint = function(self, w, h)
         if self:IsActive() then
@@ -10,13 +10,13 @@
 end
 
 -- Fonction pour ajouter des onglets avec personnalisation
-function AddCustomSheet(sheet, label, panel, icon)
+function Rewards.AddCustomSheet(sheet, label, panel, icon)
     local tab = sheet:AddSheet(label, panel, icon)
     CustomizeTab(tab.Tab)
     return tab
 end
 
- function CustomizeScrollBar(scrollPanel)
+ function Rewards.CustomizeScrollBar(scrollPanel)
     local vScrollBar = scrollPanel:GetVBar()
 
     vScrollBar.Paint = function(self, w, h)
