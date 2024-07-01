@@ -42,7 +42,7 @@ Rewards.Config.AdminGroup = {
 
 Rewards.Cooldown = 86400 -- 24 hours
 
--- You can comment tasks or change the order but don't change anything else
+-- You can comment tasks or change the order but don't change anything else !!
 
 if Rewards.getTranslation then
     Rewards.Tasks = {

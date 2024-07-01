@@ -1,4 +1,4 @@
-local Data = include("rewards/shared/data.lua")
+local Data = include("RewardsPlus/shared/data.lua")
 local saveFile = "refcodes.txt"
 local refCodes = Data.loadCooldowns(saveFile) or {}
 
@@ -31,7 +31,7 @@ local function generateRefCode()
 end
 
 -- Hook pour assigner un code de référence au joueur lors de sa première connexion
-hook.Add("PlayerInitialSpawn", "CheckPlayerRefCode", function(ply)
+hook.Add("PlayerInitialSpawn", "RewardsPlus_CheckPlayerRefCode", function(ply)
     local steamID = ply:SteamID()
     if not refCodes[steamID] then
         local newRefCode = generateRefCode()
@@ -40,7 +40,7 @@ hook.Add("PlayerInitialSpawn", "CheckPlayerRefCode", function(ply)
     end
 end)
 
-hook.Add("PlayerInitialSpawn", "CheckPendingRewards", function(ply)
+hook.Add("PlayerInitialSpawn", "RewardsPlus_CheckPendingRewards", function(ply)
     timer.Simple(5, function()
         if IsValid(ply) then
             local steamID = ply:SteamID()

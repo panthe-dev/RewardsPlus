@@ -1,6 +1,7 @@
 function Rewards.sendAnnounce(ply, message)
     for _, player in ipairs(player.GetAll()) do
         player:ChatPrint(message)
+        player:EmitSound( "Weapon_Crossbow.BoltElectrify",75, 100, 0.5, CHAN_AUTO  )
     end
 end
 
@@ -51,4 +52,40 @@ function Rewards.sendAllGiveaways(ply)
     end
 
     return giveawaysTable
+end
+
+function Rewards.GetHighlightedGiveaway()
+    local filePath = "rewards/giveaways.json"
+
+    -- Vérifier si le fichier de giveaways existe
+    if not file.Exists(filePath, "DATA") then
+        return nil
+    end
+
+    -- Charger les giveaways depuis le fichier JSON
+    local fileContent = file.Read(filePath, "DATA")
+    local giveawaysData = util.JSONToTable(fileContent) or {}
+
+    -- Vérifier les giveaways pour trouver celui qui a `hl` à `true`
+    for title, giveaway in pairs(giveawaysData.giveaways) do
+        if giveaway.hl then
+            return title
+        end
+    end
+
+    -- Si aucun giveaway avec `hl` à `true` n'est trouvé, retourner le premier
+    for title, _ in pairs(giveawaysData.giveaways) do
+        return title
+    end
+
+    return nil
+end
+
+
+function Rewards.SteamIDTo64(steamID)
+    local steamIDParts = string.Explode(":", steamID)
+    local x = tonumber(steamIDParts[2])
+    local y = tonumber(steamIDParts[3])
+    local steamID64 = (y * 2) + x + 76561197960265728
+    return tostring(steamID64)
 end

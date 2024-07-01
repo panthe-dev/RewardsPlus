@@ -57,7 +57,7 @@ Rewards.Language["en"] = {
 	["err9"] = "[RewardsPlus] The specified giveaway doesn't exist",
 	["err10"] = "[RewardsPlus] This giveaway is over!",
 	["err11"] = "[RewardsPlus] You have already joined that giveaway.",
-	["err12"] = "[RewardsPlus] You have just joined that giveaway '",
+	["err12"] = "[RewardsPlus] You have just joined the giveaway '",
 	["err13"] = "'. Good luck !",
 	["err14"] = "[RewardsPlus] No giveaways file found.",
 	["err15"] = "[RewardsPlus] The specified giveaway does not exist.",
@@ -73,6 +73,7 @@ Rewards.Language["en"] = {
 	["err25"] = "[RewardsPlus] You got a gift : ",
 	["err26"] = "[RewardsPlus] Invalid requirement type! Valid types are: steam, discord, ref, VIP, None",
 	["err27"] = "[RewardsPlus] This Giveaway is only for a category of players ",
+	["err28"] = " successfully highlighted",
 
 	["ann1"] = "[RewardsPlus] A Giveaway was created, type !rewards to join it ! ",
 
@@ -84,7 +85,7 @@ Rewards.Language["en"] = {
 	["descAdmin4"] = "Select reward type",
 	["descAdmin5"] = "Enter giftcard code...",
 	["descAdmin6"] = "Enter amount...",
-	["descAdmin7"] = "Create Giveaway",
+	["descAdmin7"] = "Create",
 	["descAdmin8"] = "Please enter the giveaway title.",
 	["descAdmin9"] = "Please select a reward type.",
 	["descAdmin10"] = "Please enter the reward details.",

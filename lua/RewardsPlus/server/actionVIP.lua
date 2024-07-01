@@ -1,11 +1,11 @@
-local Utilities = include("rewards/shared/utilities.lua")
-local Data = include("rewards/shared/data.lua")
+local Utilities = include("RewardsPlus/shared/utilities.lua")
+local Data = include("RewardsPlus/shared/data.lua")
 local cooldownTime = Rewards.Cooldown 
 local saveFile = "viprewards_cooldowns.txt"
 local cooldowns = Data.loadCooldowns(saveFile) or {}
 
 
-hook.Add("ShutDown", "SaveCooldownsOnShutdown", function()
+hook.Add("ShutDown", "RewardsPlus_SaveCooldownsOnShutdown", function()
     Data.saveCooldowns(saveFile, cooldowns)
 end)
 

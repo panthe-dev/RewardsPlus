@@ -1,62 +1,12 @@
-net.Receive("Rewards.AdminPopup", function(len, ply)
-    local giveawaytable = Rewards.sendAllGiveaways(ply)
+if SERVER then
 
-    if IsValid(ply) and Rewards.Config.AdminGroup[ply:GetUserGroup()] then
-        net.Start("Rewards.AfficherAdminPopup")
-        net.WriteUInt(#giveawaytable, 8)  
-        for _, giveaway in ipairs(giveawaytable) do
-            net.WriteString(giveaway.name)
-            net.WriteString(giveaway.rewardtype)
-            net.WriteInt(giveaway.amount, 32)
-            net.WriteBool(giveaway.hasJoined)
-            net.WriteString(giveaway.winner)
-            net.WriteBool(giveaway.redeem)
-            net.WriteInt(giveaway.players, 8)
-            net.WriteString(giveaway.requirement)
-        end
-        net.Send(ply)
-    else
-        ply:ChatPrint(Rewards.getTranslation("adminMsg"))
-    end
-end)
-
-local function checkRewards(ply, reqtype)
+ local function checkRewards(ply, reqtype)
     if reqtype == "VIP" then
         return Rewards.VIPgroup[ply:GetUserGroup()] == true
     end
     return ply:GetPData("rewards_"..reqtype) == "true"
-end
-
-net.Receive("Rewards.RequestPlayerRewards", function(len, ply)
-    local steamID = net.ReadString()
-    local targetPlayer = player.GetBySteamID(steamID)
-
-    if not targetPlayer then
-        ply:ChatPrint(Rewards.getTranslation("InvalidSteamId"))
-        return
-    end
-
-    local rewardsData = {}
-
-    -- Récupérer les valeurs des récompenses du joueur
-    local discordReward = targetPlayer:GetPData("rewards_discord", "false")
-    local steamReward = targetPlayer:GetPData("rewards_steam", "false")
-    local playtimeReward = targetPlayer:GetPData("rewards_playtime", "false")
-    local refReward = targetPlayer:GetPData("rewards_ref", "false")
+end   
     
-    rewardsData["Discord Reward"] = discordReward
-    rewardsData["Steam Reward"] = steamReward
-    rewardsData["Playtime Reward"] = playtimeReward
-    rewardsData["Referral Reward"] = refReward
-    
-    net.Start("Rewards.SendPlayerRewards")
-    net.WriteString(rewardsData["Discord Reward"])
-    net.WriteString(rewardsData["Steam Reward"])
-    net.WriteString(rewardsData["Playtime Reward"])
-    net.WriteString(rewardsData["Referral Reward"])
-    net.Send(ply)
-end)
-
 -- Fonction pour définir les valeurs des récompenses pour un joueur
 local function SetRewardsValue(ply, cmd, args)
 
@@ -97,7 +47,7 @@ end
 -- Fonction de suggestion pour le type de récompense
 local function Suggestions(cmd, args)
     if #args == 1 then
-        return {"playtime1", "playtime2", "discord", "daily", "vip", "steam", "ref"}
+        return {"discord", "daily", "vip", "steam", "ref"}
     end
 end
 
@@ -301,7 +251,7 @@ concommand.Add("join_giveaway", function(ply, cmd, args)
     -- Vérifier si le joueur est déjà dans la liste des participants
     for _, steamID in ipairs(giveaway.players) do
         if steamID == ply:SteamID() then
-            print(Rewards.getTranslation("err11"))
+            ply:ChatPrint(Rewards.getTranslation("err11"))
             return
         end
     end
@@ -368,66 +318,55 @@ concommand.Add("rand_giveaway", function(ply, cmd, args)
     Rewards.sendAnnounce(ply, Rewards.getTranslation("err17") .. title .. Rewards.getTranslation("err18") .. winnerSteamID)
 end)
 
-
-net.Receive("Rewards.redGiveaway", function(len, ply)
-    local giveawayName = net.ReadString()
-    local steamID = ply:SteamID()
+concommand.Add("hl_giveaway", function(ply, cmd, args)
     local filePath = "rewards/giveaways.json"
+
+    -- Vérifier les permissions de l'administrateur
+    if not IsValid(ply) or not Rewards.Config.AdminGroup[ply:GetUserGroup()] then
+        print(Rewards.getTranslation("noperm"))
+        return
+    end
+
+    -- Vérifier les arguments
+    if #args < 1 then
+        print("Usage: hl_giveaway <title>")
+        return
+    end
+
+    local title = args[1]
 
     -- Vérifier si le fichier de giveaways existe
     if not file.Exists(filePath, "DATA") then
-        ply:ChatPrint(Rewards.getTranslation("err8"))
+        print(Rewards.getTranslation("err14"))
         return
     end
 
     -- Charger les giveaways depuis le fichier JSON
-    local giveawaysData = util.JSONToTable(file.Read(filePath, "DATA")) or {}
-    local giveaways = giveawaysData.giveaways
+    local fileContent = file.Read(filePath, "DATA")
+    local giveawaysData = util.JSONToTable(fileContent) or {}
 
     -- Vérifier si le giveaway spécifié existe
-    local giveaway = giveaways[giveawayName]
+    local giveaway = giveawaysData.giveaways[title]
     if not giveaway then
-        ply:ChatPrint(Rewards.getTranslation("err9"))
+        print(Rewards.getTranslation("err15"))
         return
     end
 
-    -- Vérifier si le joueur a gagné le giveaway
-    if giveaway.winner ~= steamID then
-        ply:ChatPrint(Rewards.getTranslation("err20"))
-        return
+    -- Mettre à jour le champ hl de tous les giveaways
+    for k, v in pairs(giveawaysData.giveaways) do
+        if k == title then
+            v.hl = true
+        else
+            v.hl = false
+        end
     end
 
-    -- Vérifier si le giveaway a déjà été réclamé
-    if giveaway.redeem then
-        ply:ChatPrint(Rewards.getTranslation("err21"))
-        return
-    end
+    ply:ChatPrint("Giveaway '" .. title .. Rewards.getTranslation("err28"))
 
-    if giveaway.rewardtype == "DarkRP" then
-        ply:addMoney(giveaway.amount)
-        ply:ChatPrint(Rewards.getTranslation("RewardText") .. giveaway.amount .. " DarkRP Money !")
-    elseif giveaway.rewardtype == "aShop" then
-        ply:ashop_addCoinsSafe(giveaway.amount, false)
-        ply:ChatPrint(Rewards.getTranslation("RewardText") .. giveaway.amount .. " points aShop !")
-    elseif giveaway.rewardtype == "SH Pointshop" then
-        RunConsoleCommand("sh_pointshop_add_standard_points", ply:SteamID(), tostring(giveaway.amount))
-        ply:ChatPrint(Rewards.getTranslation("RewardText") .. giveaway.amount .. " points SH Pointshop !")
-    elseif giveaway.rewardtype == "giftcard" then
-        -- Donner un code cadeau au joueur
-        ply:ChatPrint(Rewards.getTranslation("err25") .. giveaway.giftcode)
-    else
-        ply:ChatPrint(Rewards.getTranslation("err24"))
-        return
-    end
-
-    -- Marquer le giveaway comme réclamé
-    giveaway.redeem = true
-
-    -- Mettre à jour le fichier JSON avec le nouveau statut
-    file.Write(filePath, util.TableToJSON(giveawaysData, true))
-
-    ply:ChatPrint(Rewards.getTranslation("err22") .. giveawayName .. Rewards.getTranslation("err23"))
+    -- Mettre à jour le fichier JSON avec le gagnant
+    file.Write(filePath, util.TableToJSON(giveawaysData))
 end)
 
-
+    
+end
 

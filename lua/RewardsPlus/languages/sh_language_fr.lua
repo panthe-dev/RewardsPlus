@@ -73,6 +73,7 @@ Rewards.Language["fr"] = {
 	["err25"] = "[RewardsPlus] Vous avez reçu un code cadeau : ",
 	["err26"] = "[RewardsPlus] Type de prérequis invalide! types valides: steam, discord, ref, VIP, None",
 	["err27"] = "[RewardsPlus] Ce Giveaway est restraint à une catégorie de joueurs ",
+	["err28"] = " mis en avant avec succès",
 
 	["ann1"] = "[RewardsPlus] Un concours a été crée, écris !rewards pour le rejoindre ! ",
 
@@ -84,7 +85,7 @@ Rewards.Language["fr"] = {
 	["descAdmin4"] = "Entre le type de récompense",
 	["descAdmin5"] = "Entre le code de carte cadeau...",
 	["descAdmin6"] = "Entre le montant...",
-	["descAdmin7"] = "Créer Concours",
+	["descAdmin7"] = "Créer",
 	["descAdmin8"] = "Svp entre le titre du concours",
 	["descAdmin9"] = "Svp selectionne un type de récompense",
 	["descAdmin10"] = "Svp entre les détails du concours",

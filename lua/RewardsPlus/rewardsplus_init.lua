@@ -1,7 +1,7 @@
 
 Rewards = Rewards or {}
 
-include('rewards/config.lua')
+include('RewardsPlus/config.lua')
 include('shared/sh_function.lua')
 include('languages/sh_language_en.lua')
 include('languages/sh_language_fr.lua')
@@ -20,18 +20,19 @@ if SERVER then
 	end
 
 	AddCSLuaFile()
-	AddCSLuaFiles('rewards/client/')
-	AddCSLuaFile('rewards/init.lua')
-	AddCSLuaFile('rewards/config.lua')
-	AddCSLuaFile('rewards/shared/sh_function.lua')
-	AddCSLuaFile('rewards/languages/sh_language_en.lua')
-	AddCSLuaFile('rewards/languages/sh_language_fr.lua')
+	AddCSLuaFiles('RewardsPlus/client/')
+	AddCSLuaFile('RewardsPlus/rewardsplus_init.lua')
+	AddCSLuaFile('RewardsPlus/config.lua')
+	AddCSLuaFile('RewardsPlus/shared/sh_function.lua')
+	AddCSLuaFile('RewardsPlus/languages/sh_language_en.lua')
+	AddCSLuaFile('RewardsPlus/languages/sh_language_fr.lua')
 	
 	include('config.lua')
 	include('shared/data.lua')
 	include('shared/utilities.lua')
 
 	include('server/command.lua')
+	include('server/concommand.lua')
 	include('server/actionSteam.lua')
 	include('server/actionDiscord.lua')
 	include('server/actionDaily.lua')
@@ -50,5 +51,7 @@ if CLIENT then
 	include('client/popup.lua')
 	include('client/adminpopup.lua')
 	include('client/refpopup.lua')
+	include('client/hlpopup.lua')
 	include('client/function.lua')
+	include('client/roulette.lua')
 end

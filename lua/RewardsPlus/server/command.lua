@@ -1,6 +1,6 @@
 if SERVER then
-    local Utilities = include("rewards/shared/utilities.lua")
-    local Data = include("rewards/shared/data.lua")
+    local Utilities = include("RewardsPlus/shared/utilities.lua")
+    local Data = include("RewardsPlus/shared/data.lua")
     local saveFile = "dailyrewards_cooldowns.txt"
     local cooldowns = Data.loadCooldowns(saveFile) or {}
     local saveFileVIP = "viprewards_cooldowns.txt"
@@ -11,7 +11,7 @@ if SERVER then
     local refCodes = Data.loadCooldowns(refFile) or {}
 
 
-    local function EnvoyerPopup(ply, checkData)
+    local function EnvoyerPopup(ply, checkData, activeTab, coorScroll)
         local giveawaytable = Rewards.sendAllGiveaways(ply)
 
         net.Start("Rewards.AfficherPopup")
@@ -44,6 +44,8 @@ if SERVER then
         net.WriteBool(checkData.vip)
 
         net.WriteString(ply:SteamID())
+        net.WriteUInt(activeTab or 1, 8)   
+        net.WriteUInt(coorScroll or 1, 16)
         net.Send(ply)
     end
 
@@ -65,30 +67,38 @@ end
             local checkData = CreerCheckData(ply)
             EnvoyerPopup(ply, checkData)
         end
+        local title = Rewards.GetHighlightedGiveaway()
+
+        if title then
+            net.Start("Rewards.openHl")
+            net.WriteString(title)
+            net.Send(ply)
+        end
     end
 
-    local function RafraichirPopup(ply)
+    local function RafraichirPopup(ply, activeTab, coorScroll)
         local checkData = CreerCheckData(ply)
-        EnvoyerPopup(ply, checkData)
+        EnvoyerPopup(ply, checkData, activeTab, coorScroll)
     end
 
     -- display popup when spawning
-    hook.Add("PlayerInitialSpawn", "AfficherPopupAuSpawn", AfficherPopup)
+    hook.Add("PlayerInitialSpawn", "RewardsPlus_AfficherPopupAuSpawn", AfficherPopup)
 
     -- display popup when !rewards
-    hook.Add("PlayerSay", "cmdrewards", function(_p, _text, public)
+    hook.Add("PlayerSay", "RewardsPlus_cmdrewards", function(ply, _text, public)
         if (_text == "!rewards") then
-            --_p:SetPData( "rewards_playtime1", 'false' )
-            _p:ConCommand("rewards")
-            local checkData = CreerCheckData(_p)
-            EnvoyerPopup(_p, checkData)
+            ply:ConCommand("rewards")
+            local checkData = CreerCheckData(ply)
+            EnvoyerPopup(ply, checkData)
             return ""
         end
     end)
 
     -- refresh page after clicking a button
     net.Receive("Rewards.RefreshPopUp", function(len, ply)
-        RafraichirPopup(ply)
+        local activeTab = net.ReadUInt(8) or 1
+        local coorScroll = net.ReadUInt(16) or 1
+        RafraichirPopup(ply, activeTab, coorScroll)
     end)
     
 end
