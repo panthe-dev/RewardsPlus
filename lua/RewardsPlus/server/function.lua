@@ -35,16 +35,21 @@ function Rewards.sendAllGiveaways(ply)
         elseif giveawayData.requirement == "VIP" then requirement = Rewards.getTranslation("descAdmin23")
         else requirement = Rewards.getTranslation("descAdmin24")
         end
-        
+
+        -- Calculer le nombre de participants
+        local playerCount = 0
+        for _ in pairs(players) do
+            playerCount = playerCount + 1
+        end   
 
         local giveaway = {
             name = giveawayData.name or "Unnamed Giveaway",
             rewardtype = giveawayData.rewardtype or "Unknown Reward Type",
             amount = giveawayData.amount or 0,  
-            hasJoined = table.HasValue(players, ply:SteamID()),
+            hasJoined = players[ply:SteamID()] or false,
             winner = giveawayData.winner or "",
             redeem = giveawayData.redeem or false,
-            players = #players or 0,
+            players = playerCount,
             requirement = requirement
             
         }
@@ -83,6 +88,7 @@ end
 
 
 function Rewards.SteamIDTo64(steamID)
+    if not steamID then return end
     local steamIDParts = string.Explode(":", steamID)
     local x = tonumber(steamIDParts[2])
     local y = tonumber(steamIDParts[3])

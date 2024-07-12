@@ -16,9 +16,11 @@ local function EnvoyerAdminPopup(ply, activeTab, coorScroll)
             net.WriteInt(giveaway.players, 8)
             net.WriteString(giveaway.requirement)
         end
-        net.WriteUInt(activeTab or 1, 8)
-        net.WriteUInt(coorScroll or 1, 16)
-        net.Send(ply)
+
+            net.WriteUInt(activeTab or 1, 8)
+            net.WriteUInt(coorScroll or 1, 16)
+            net.Send(ply)
+        
     else
         ply:ChatPrint(Rewards.getTranslation("adminMsg"))
     end
@@ -103,21 +105,10 @@ net.Receive("Rewards.redGiveaway", function(len, ply)
         return
     end
 
-    if giveaway.rewardtype == "DarkRP" then
-        ply:addMoney(giveaway.amount)
-        ply:ChatPrint(Rewards.getTranslation("RewardText") .. giveaway.amount .. " DarkRP Money !")
-    elseif giveaway.rewardtype == "aShop" then
-        ply:ashop_addCoinsSafe(giveaway.amount, false)
-        ply:ChatPrint(Rewards.getTranslation("RewardText") .. giveaway.amount .. " points aShop !")
-    elseif giveaway.rewardtype == "SH Pointshop" then
-        RunConsoleCommand("sh_pointshop_add_standard_points", ply:SteamID(), tostring(giveaway.amount))
-        ply:ChatPrint(Rewards.getTranslation("RewardText") .. giveaway.amount .. " points SH Pointshop !")
-    elseif giveaway.rewardtype == "giftcard" then
-        -- Donner un code cadeau au joueur
-        ply:ChatPrint(Rewards.getTranslation("err25") .. giveaway.giftcode)
+    if giveaway.rewardtype == "giftcard" then
+        if Rewards.types[giveaway.rewardtype] and Rewards.types[giveaway.rewardtype].OnClaim then Rewards.types[giveaway.rewardtype].OnClaim(ply, giveaway.giftcode) end
     else
-        ply:ChatPrint(Rewards.getTranslation("err24"))
-        return
+        if Rewards.types[giveaway.rewardtype] and Rewards.types[giveaway.rewardtype].OnClaim then Rewards.types[giveaway.rewardtype].OnClaim(ply, giveaway.amount) end
     end
 
     -- Marquer le giveaway comme réclamé

@@ -15,6 +15,12 @@ if CLIENT then
 
     net.Receive("Rewards.AfficherPopup", function(len, ply)
 
+        if(popupFrameOpen) then -- prevent from opening multiple menus
+            return
+        end
+
+        popupFrameOpen = true
+
         local Giveaways = {}
         local numGiveaways = net.ReadUInt(8)
 
@@ -47,22 +53,16 @@ if CLIENT then
  
         local checkData = {
             daily = net.ReadBool(),
-            discord = net.ReadBool(),
+            discord = net.ReadString(),
             ref = net.ReadString(),
             refcode = net.ReadString(),
-            steam = net.ReadBool(),
+            steam = net.ReadString(),
             vip = net.ReadBool()
         }
 
         local steamid = net.ReadString()
         local activeTab = net.ReadUInt(8) or 1
         local coorScroll = net.ReadUInt(16) or 1
-
-        if(popupFrameOpen) then -- prevent from opening multiple menus
-            return
-        end
-
-        popupFrameOpen = true
 
         -- Window
         local popupFrame = vgui.Create("DFrame")
@@ -162,6 +162,7 @@ if CLIENT then
         end
 
         local yPos = 10 -- Position Y initial 1st element
+        PrintTable(checkData)
 
         for _, task in ipairs(Tasks) do
             local taskPanel = vgui.Create("DPanel", taskScrollPanel)
@@ -189,8 +190,9 @@ if CLIENT then
             actionDescriptionLabel:SetTextColor(colWhite)
 
             -- Création du bouton "Redeem Reward"
-            if (checkData.steam and task.name == "Steam Group") or 
-                (checkData.discord and task.name == "Discord") or
+            
+            if (checkData.steam == 'true' and task.name == "Steam Group") or 
+                (checkData.discord == 'true' and task.name == "Discord") or
                 (checkData.ref == 'true' and task.name == "Referral Code")
              then
 

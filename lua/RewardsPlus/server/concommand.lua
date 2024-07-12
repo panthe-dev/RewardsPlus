@@ -81,7 +81,9 @@ concommand.Add("set_giveaway", function(ply, cmd, args)
     local validRewardTypes = {
         ["DarkRP"] = true,
         ["aShop"] = true,
-        ["SH Pointshop"] = true,
+        ["PS1"] = true,
+        ["PS2"] = true,
+        ["PS2 Premium"] = true,
         ["giftcard"] = true
     }
 
@@ -249,15 +251,13 @@ concommand.Add("join_giveaway", function(ply, cmd, args)
     end
 
     -- Vérifier si le joueur est déjà dans la liste des participants
-    for _, steamID in ipairs(giveaway.players) do
-        if steamID == ply:SteamID() then
-            ply:ChatPrint(Rewards.getTranslation("err11"))
-            return
-        end
+    if giveaway.players[ply:SteamID()] then
+        ply:ChatPrint(Rewards.getTranslation("err11"))
+        return
     end
 
     -- Ajouter le SteamID du joueur à la liste des participants
-    table.insert(giveaway.players, ply:SteamID())
+    giveaway.players[ply:SteamID()] = true
 
     -- Mettre à jour le fichier JSON avec le nouveau joueur
     file.Write(filePath, util.TableToJSON(giveawaysData, true))
@@ -300,23 +300,28 @@ concommand.Add("rand_giveaway", function(ply, cmd, args)
     end
 
     -- Vérifier si le giveaway a des participants
-    if not giveaway.players or #giveaway.players == 0 then
+    if not giveaway.players or next(giveaway.players) == nil then
         ply:ChatPrint(Rewards.getTranslation("err16"))
         return
     end
 
     -- Tirer au sort un joueur parmi les participants
-    local winnerIndex = math.random(1, #giveaway.players)
-    local winnerSteamID = giveaway.players[winnerIndex]
+    local steamIDs = {}
+    for steamID in pairs(giveaway.players) do
+        table.insert(steamIDs, steamID)
+    end
+    local winnerIndex = math.random(1, #steamIDs)
+    local winnerSteamID = steamIDs[winnerIndex]
 
     -- Ajouter le champ winner avec le Steam ID du joueur
     giveaway.winner = winnerSteamID
 
     -- Mettre à jour le fichier JSON avec le gagnant
-    file.Write(filePath, util.TableToJSON(giveawaysData))
+    file.Write(filePath, util.TableToJSON(giveawaysData, true))
 
     Rewards.sendAnnounce(ply, Rewards.getTranslation("err17") .. title .. Rewards.getTranslation("err18") .. winnerSteamID)
 end)
+
 
 concommand.Add("hl_giveaway", function(ply, cmd, args)
     local filePath = "rewards/giveaways.json"
@@ -363,8 +368,15 @@ concommand.Add("hl_giveaway", function(ply, cmd, args)
 
     ply:ChatPrint("Giveaway '" .. title .. Rewards.getTranslation("err28"))
 
-    -- Mettre à jour le fichier JSON avec le gagnant
     file.Write(filePath, util.TableToJSON(giveawaysData))
+
+    local title = Rewards.GetHighlightedGiveaway()
+
+    if title then
+        net.Start("Rewards.openHl")
+        net.WriteString(title)
+        net.Send(ply)
+    end
 end)
 
     

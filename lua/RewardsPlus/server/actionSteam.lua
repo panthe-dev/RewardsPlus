@@ -52,14 +52,7 @@ net.Receive("Rewards.actionSteam", function(len, ply)
         if ply:GetPData("rewards_steam") == 'false' or ply:GetPData("rewards_steam") == nil then
             if inGroup then
                 ply:SetPData( "rewards_steam", 'true' )
-                if Rewards.Config.SteamRewardType == "AShop" then
-                    ply:ashop_addCoinsSafe(Rewards.Config.SteamReward, false)
-                elseif Rewards.Config.SteamRewardType == "SH Pointshop" then
-                    RunConsoleCommand("sh_pointshop_add_standard_points", ply:SteamID(), tostring(Rewards.Config.SteamReward))
-                else
-                    ply:addMoney(Rewards.Config.SteamReward)                  
-                end
-                ply:ChatPrint(Rewards.getTranslation("RewardText")..Rewards.Config.SteamReward.. " "..Rewards.Config.Currency)
+                if Rewards.types[Rewards.Config.SteamRewardType] and Rewards.types[Rewards.Config.SteamRewardType].OnClaim then Rewards.types[Rewards.Config.SteamRewardType].OnClaim(ply, Rewards.Config.SteamReward) end
             else
                 net.Start("Rewards.openSteam")
                 net.WriteString(Rewards.Config.SteamGroupID)

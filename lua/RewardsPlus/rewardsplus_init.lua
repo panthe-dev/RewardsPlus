@@ -40,6 +40,7 @@ if SERVER then
 	include('server/actionReferral.lua')
 	include('server/admin.lua')
 	include('server/function.lua')
+	include('server/rewardtype.lua')
 
 end
 

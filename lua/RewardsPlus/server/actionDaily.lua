@@ -1,8 +1,6 @@
-local Utilities = include("RewardsPlus/shared/utilities.lua")
-local Data = include("RewardsPlus/shared/data.lua")
 local cooldownTime = Rewards.Cooldown 
 local saveFile = "dailyrewards_cooldowns.txt"
-local cooldowns = Data.loadCooldowns(saveFile) or {}
+local cooldowns = Rewards.loadCooldowns(saveFile) or {}
 
 net.Receive("Rewards.actionDaily", function(len, ply)
 
@@ -24,7 +22,7 @@ local function verifySteamName(steamid, callback)
 end
 
 hook.Add("ShutDown", "RewardsPlus_SaveCooldownsOnShutdown", function()
-    Data.saveCooldowns(saveFile, cooldowns)
+    Rewards.saveCooldowns(saveFile, cooldowns)
 end)
 
 
@@ -32,7 +30,7 @@ net.Receive("Rewards.resDaily", function(len, ply)
     local steamName = net.ReadString()
 
     if(string.sub(steamName, 1, #Rewards.ServerTag) == Rewards.ServerTag) then
-        if Utilities.isPlayerOnCooldown(ply, cooldowns, cooldownTime) then
+        if Rewards.isPlayerOnCooldown(ply, cooldowns, cooldownTime) then
             local remainingTime = cooldownTime - (os.time() - cooldowns[ply:SteamID()])
             local hours = math.floor(remainingTime / 3600)
             local minutes = math.floor((remainingTime % 3600) / 60)
@@ -41,17 +39,8 @@ net.Receive("Rewards.resDaily", function(len, ply)
             ply:ChatPrint(string.format(Rewards.getTranslation("DailyText1"), hours, minutes, seconds))
         else
             cooldowns[ply:SteamID()] = os.time()
-            Data.saveCooldowns(saveFile, cooldowns)
-
-            if Rewards.Config.DailyRewardType == "AShop" then
-                ply:ashop_addCoinsSafe(Rewards.Config.DailyReward, false)
-            elseif Rewards.Config.DailyRewardType == "SH Pointshop" then
-                RunConsoleCommand("sh_pointshop_add_standard_points", ply:SteamID(), tostring(Rewards.Config.DailyReward))
-            else
-                ply:addMoney(Rewards.Config.DailyReward)                  
-            end
-            ply:ChatPrint(Rewards.getTranslation("RewardText")..Rewards.Config.DailyReward.. " "..Rewards.Config.Currency)
-        end
+            Rewards.saveCooldowns(saveFile, cooldowns)
+            if Rewards.types[Rewards.Config.DailyRewardType] and Rewards.types[Rewards.Config.DailyRewardType].OnClaim then Rewards.types[Rewards.Config.DailyRewardType].OnClaim(ply, Rewards.Config.DailyReward) end        end
     else
         ply:ChatPrint(Rewards.getTranslation("DailyText2"))
     end

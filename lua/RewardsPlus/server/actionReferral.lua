@@ -47,15 +47,7 @@ hook.Add("PlayerInitialSpawn", "RewardsPlus_CheckPendingRewards", function(ply)
             local pendingReward = tonumber(ply:GetPData("pending_reward", "0"))
 
             if pendingReward > 0 then
-
-                if Rewards.Config.RefRewardType == "AShop" then
-                    ply:ashop_addCoinsSafe(pendingReward, false)
-                elseif Rewards.Config.RefRewardType == "SH Pointshop" then
-                    RunConsoleCommand("sh_pointshop_add_standard_points", ply:SteamID(), tostring(pendingReward))
-                else
-                    ply:addMoney(pendingReward)                  
-                end
-                ply:ChatPrint(Rewards.getTranslation("RewardText") .. pendingReward .. " "..Rewards.Config.Currency..Rewards.getTranslation("RefText1"))
+                if Rewards.types[Rewards.Config.RefRewardType] and Rewards.types[Rewards.Config.RefRewardType].OnClaim then Rewards.types[Rewards.Config.RefRewardType].OnClaim(ply, pendingReward) end
                 ply:SetPData("pending_reward", 0)
             end
         end
@@ -86,28 +78,11 @@ net.Receive("Rewards.submitRefCode", function(len, ply)
 
     if isValidCode then
         ply:SetPData("rewards_ref", 'true')
-
-        if Rewards.Config.RefRewardType == "AShop" then
-            ply:ashop_addCoinsSafe(Rewards.Config.RefReward, false)
-        elseif Rewards.Config.RefRewardType == "SH Pointshop" then
-            RunConsoleCommand("sh_pointshop_add_standard_points", ply:SteamID(), tostring(Rewards.Config.RefReward))
-        else
-            ply:addMoney(Rewards.Config.RefReward)                  
-        end
-        ply:ChatPrint(Rewards.getTranslation("RewardText")..Rewards.Config.RefReward.. " "..Rewards.Config.Currency)
-
+        if Rewards.types[Rewards.Config.RefRewardType] and Rewards.types[Rewards.Config.RefRewardType].OnClaim then Rewards.types[Rewards.Config.RefRewardType].OnClaim(ply, Rewards.Config.RefReward) end
         local refOwner = player.GetBySteamID(refOwnerSteamID)
         if refOwner then
 
-            if Rewards.Config.RefRewardType == "AShop" then
-                refOwner:ashop_addCoinsSafe(Rewards.Config.RefReward, false)
-            elseif Rewards.Config.RefRewardType == "SH Pointshop" then
-                RunConsoleCommand("sh_pointshop_add_standard_points", refOwnerSteamID, tostring(Rewards.Config.RefReward))
-            else
-                refOwner:addMoney(Rewards.Config.RefReward)                  
-            end
-            refOwner:ChatPrint(Rewards.getTranslation("RewardText")..Rewards.Config.RefReward.. " "..Rewards.Config.Currency)
-
+            if Rewards.types[Rewards.Config.RefRewardType] and Rewards.types[Rewards.Config.RefRewardType].OnClaim then Rewards.types[Rewards.Config.RefRewardType].OnClaim(refOwner, Rewards.Config.RefReward) end
         else
             -- Si le propriétaire du code n'est pas en ligne, stockez la récompense pour une utilisation ultérieure
             local pendingReward = tonumber(ply:GetPData("pending_reward", 0))
