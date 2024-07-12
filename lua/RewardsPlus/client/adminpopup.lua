@@ -177,7 +177,9 @@ if CLIENT then
         rewardTypeCombo:SetValue(Rewards.getTranslation("descAdmin4"))
         rewardTypeCombo:AddChoice("DarkRP")
         rewardTypeCombo:AddChoice("aShop")
-        rewardTypeCombo:AddChoice("SH Pointshop")
+        rewardTypeCombo:AddChoice("PS1")
+        rewardTypeCombo:AddChoice("PS2")
+        rewardTypeCombo:AddChoice("PS2 Premium")
         rewardTypeCombo:AddChoice("giftcard")
 
         -- Scroll menu for requirement type

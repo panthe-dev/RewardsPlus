@@ -1,7 +1,5 @@
 -- data.lua
 
-local Data = {}
-
 -- Chemin du répertoire de sauvegarde des données
 local saveDirectory = "rewards/"
 
@@ -14,7 +12,7 @@ local function getSaveFilePath(saveFile)
     return saveDirectory .. saveFile
 end
 
-function Data.loadCooldowns(saveFile)
+function Rewards.loadCooldowns(saveFile)
     if file.Exists(getSaveFilePath(saveFile), "DATA") then
         local data = file.Read(getSaveFilePath(saveFile), "DATA")
         return util.JSONToTable(data)
@@ -25,8 +23,7 @@ function Data.loadCooldowns(saveFile)
 end
 
 
-function Data.saveCooldowns(saveFile, cooldowns)
+function Rewards.saveCooldowns(saveFile, cooldowns)
     file.Write(getSaveFilePath(saveFile), util.TableToJSON(cooldowns))
 end
 
-return Data

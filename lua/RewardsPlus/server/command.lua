@@ -1,14 +1,12 @@
 if SERVER then
-    local Utilities = include("RewardsPlus/shared/utilities.lua")
-    local Data = include("RewardsPlus/shared/data.lua")
     local saveFile = "dailyrewards_cooldowns.txt"
-    local cooldowns = Data.loadCooldowns(saveFile) or {}
+    local cooldowns = Rewards.loadCooldowns(saveFile) or {}
     local saveFileVIP = "viprewards_cooldowns.txt"
-    local cooldownsVIP = Data.loadCooldowns(saveFileVIP) or {}
+    local cooldownsVIP = Rewards.loadCooldowns(saveFileVIP) or {}
     local cooldownTime = Rewards.Cooldown
     local Tasks = Rewards.Tasks
     local refFile = "refcodes.txt"
-    local refCodes = Data.loadCooldowns(refFile) or {}
+    local refCodes = Rewards.loadCooldowns(refFile) or {}
 
 
     local function EnvoyerPopup(ply, checkData, activeTab, coorScroll)
@@ -37,10 +35,10 @@ if SERVER then
         end
 
         net.WriteBool(checkData.daily)
-        net.WriteBool(checkData.discord)
+        net.WriteString(checkData.discord)
         net.WriteString(checkData.ref)
         net.WriteString(checkData.refcode)
-        net.WriteBool(checkData.steam)
+        net.WriteString(checkData.steam)
         net.WriteBool(checkData.vip)
 
         net.WriteString(ply:SteamID())
@@ -55,8 +53,8 @@ if SERVER then
     return {
         steam = ply:GetPData("rewards_steam") or 'false',
         discord = ply:GetPData("rewards_discord") or 'false',
-        daily = Utilities.isPlayerOnCooldown(ply, cooldowns, cooldownTime),
-        vip = Utilities.isPlayerOnCooldown(ply, cooldownsVIP, cooldownTime),
+        daily = Rewards.isPlayerOnCooldown(ply, cooldowns, cooldownTime),
+        vip = Rewards.isPlayerOnCooldown(ply, cooldownsVIP, cooldownTime),
         ref = ply:GetPData("rewards_ref") or 'false',
         refcode = refcodeplayer
     }

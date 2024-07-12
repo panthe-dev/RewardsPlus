@@ -2,16 +2,20 @@ if CLIENT then
     local popupFrameOpen = false
 
     local colBluesky = Color(0, 153, 230, 255)
-    local colBluesky2 = Color(0, 153, 230, 250)
     local colBluesky3 = Color(0, 153, 230, 200)
     local colGrey = Color(49, 57, 68, 240)
     local colRed = Color(255, 0, 0,255)
     local colRed2 = Color(204, 0, 0, 200)
     local colWhite = Color(255, 255, 255)
-    local colInv = Color(200, 50, 50, 0)
+
+    local GiveawayBanner
 
 
     local function CreateGiveawayBanner(giveawayTitle)
+
+        if IsValid(GiveawayBanner) then
+            GiveawayBanner:Remove()
+        end
 
         GiveawayBanner = vgui.Create("DPanel")
         GiveawayBanner:SetSize(Rewards.AdapteResolution(1920,60))
