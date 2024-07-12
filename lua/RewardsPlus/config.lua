@@ -2,10 +2,10 @@ Rewards.Config = Rewards.Config or {}
 
 Rewards.Config.Lang = 'en' -- ('en' = English, 'fr' = French)
 
-Rewards.Config.SteamAPIKey = 'A73551CF57FB1C50F06282C0433F4CA8' -- You can get this at https://steamcommunity.com/dev/apikey.
-Rewards.Config.SteamGroupID = '33780955' -- You can get the ID of your group steam by editing it
+Rewards.Config.SteamAPIKey = '' -- You can get this at https://steamcommunity.com/dev/apikey.
+Rewards.Config.SteamGroupID = '' -- You can get the ID of your group steam by editing it
 
-Rewards.Config.DiscordID = 'pYhgPaphUP' -- The last letters of your invitation link
+Rewards.Config.DiscordID = '' -- The last letters of your invitation link
 
 Rewards.Config.Shop = 'https://www.google.fr/' -- link of your shop
 
